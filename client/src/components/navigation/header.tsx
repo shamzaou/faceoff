@@ -82,7 +82,11 @@ export default function Header() {
             <div className="flex items-center gap-4">
               <ModeToggle />
               
-              <Button variant="ghost" className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none transition-colors duration-200">
+              <Button 
+                variant="ghost" 
+                className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none transition-colors duration-200"
+                onClick={() => navigate("/login")}
+              >
                 <span className="mr-2">Login with</span>
                 <span className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">42</span>
               </Button>

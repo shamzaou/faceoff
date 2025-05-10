@@ -100,6 +100,15 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
               </svg>
               Admin
             </div>
+            <div 
+              onClick={() => navigate("/login")}
+              className={navLinkClasses("/login")}
+            >
+              <svg className="mr-3 h-6 w-6 text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Login
+            </div>
           </nav>
         </div>
       </div>
