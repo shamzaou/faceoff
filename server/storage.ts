@@ -3,6 +3,8 @@ import {
   events, type Event, type InsertEvent,
   eventAttendees, type EventAttendee, type InsertEventAttendee
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, count, sql } from "drizzle-orm";
 
 // Modify the interface with any CRUD methods you might need
 export interface IStorage {
@@ -250,4 +252,110 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByFortyTwoId(fortytwoId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.fortytwoId, fortytwoId));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async getAllEvents(): Promise<Event[]> {
+    return await db.select().from(events);
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async getUpcomingEvents(): Promise<Event[]> {
+    return await db.select().from(events).where(
+      eq(events.status, "upcoming").or(eq(events.status, "ongoing"))
+    );
+  }
+
+  async getPastEvents(): Promise<Event[]> {
+    return await db.select().from(events).where(eq(events.status, "past"));
+  }
+
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const [event] = await db.insert(events).values({
+      ...insertEvent,
+      attendees: insertEvent.attendees || 0
+    }).returning();
+    return event;
+  }
+
+  async updateEvent(id: number, updateData: Partial<InsertEvent>): Promise<Event | undefined> {
+    const [event] = await db
+      .update(events)
+      .set(updateData)
+      .where(eq(events.id, id))
+      .returning();
+    return event;
+  }
+
+  async deleteEvent(id: number): Promise<boolean> {
+    const result = await db.delete(events).where(eq(events.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async registerForEvent(eventId: number, userId: number): Promise<EventAttendee> {
+    // Check if user is already registered
+    const [existingRegistration] = await db
+      .select()
+      .from(eventAttendees)
+      .where(
+        and(
+          eq(eventAttendees.eventId, eventId),
+          eq(eventAttendees.userId, userId)
+        )
+      );
+    
+    if (existingRegistration) {
+      throw new Error("User is already registered for this event");
+    }
+    
+    // Update event attendee count
+    await db
+      .update(events)
+      .set({ 
+        attendees: db.select({ value: sql`${events.attendees} + 1` }).from(events).where(eq(events.id, eventId)).as("value")
+      })
+      .where(eq(events.id, eventId));
+    
+    // Create registration
+    const [eventAttendee] = await db
+      .insert(eventAttendees)
+      .values({ eventId, userId })
+      .returning();
+    
+    return eventAttendee;
+  }
+
+  async getEventAttendees(eventId: number): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(eventAttendees)
+      .where(eq(eventAttendees.eventId, eventId));
+    
+    return result?.count || 0;
+  }
+}
+
+// Use database storage
+export const storage = new DatabaseStorage();
