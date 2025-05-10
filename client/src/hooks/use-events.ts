@@ -8,26 +8,26 @@ export function useEvents() {
   // Get all events
   const { data: events = [], isLoading, error } = useQuery<Event[]>({
     queryKey: ['/api/events'],
+    queryFn: () => apiRequest('/api/events'),
   });
   
   // Get upcoming events
   const { data: upcomingEvents = [] } = useQuery<Event[]>({
     queryKey: ['/api/events/upcoming'],
+    queryFn: () => apiRequest('/api/events/upcoming'),
   });
   
   // Get past events
   const { data: pastEvents = [] } = useQuery<Event[]>({
     queryKey: ['/api/events/past'],
+    queryFn: () => apiRequest('/api/events/past'),
   });
   
   // Get event by ID
   const getEvent = (id: number) => {
     return useQuery<Event>({
       queryKey: ['/api/events', id],
-      queryFn: async () => {
-        const res = await apiRequest('GET', `/api/events/${id}`);
-        return res.json();
-      },
+      queryFn: () => apiRequest(`/api/events/${id}`),
     });
   };
   
