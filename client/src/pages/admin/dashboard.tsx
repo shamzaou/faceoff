@@ -9,7 +9,7 @@ import DeleteEventModal from "@/components/admin/delete-event-modal";
 import EditEventModal from "@/components/admin/edit-event-modal";
 import { Event } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AdminDashboard() {
@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [, navigate] = useLocation();
   const { toast } = useToast();
 
   // Filter events based on search and status filter
@@ -190,9 +191,12 @@ export default function AdminDashboard() {
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              <Link href={`/events/${event.id}`}>
-                                <a className="hover:text-primary dark:hover:text-primary-400">{event.title}</a>
-                              </Link>
+                              <span 
+                                onClick={() => navigate(`/events/${event.id}`)}
+                                className="hover:text-primary dark:hover:text-primary-400 cursor-pointer"
+                              >
+                                {event.title}
+                              </span>
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">{event.organizer}</div>
                           </div>

@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useEvents } from "@/hooks/use-events";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +9,13 @@ import { isUpcomingOrOngoing } from "@/lib/utils/date-formatter";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EventDetail() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id || "0";
   const eventId = parseInt(id);
   const { getEvent, registerForEvent } = useEvents();
   const { data: event, isLoading, error } = getEvent(eventId);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   
   const handleRegister = async () => {
     try {
@@ -37,14 +39,15 @@ export default function EventDetail() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
           <nav className="flex mb-5 text-sm text-gray-500 dark:text-gray-400">
-            <Link href="/">
-              <a className="hover:text-primary dark:hover:text-primary-400 transition-colors duration-200">
-                <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Events
-              </a>
-            </Link>
+            <span 
+              onClick={() => navigate("/")}
+              className="hover:text-primary dark:hover:text-primary-400 transition-colors duration-200 cursor-pointer"
+            >
+              <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Events
+            </span>
           </nav>
           
           <Card>
@@ -90,9 +93,7 @@ export default function EventDetail() {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               The event you're looking for doesn't exist or there was an error loading it.
             </p>
-            <Link href="/">
-              <Button>Return to Home</Button>
-            </Link>
+            <Button onClick={() => navigate("/")}>Return to Home</Button>
           </Card>
         </div>
       </div>
@@ -104,14 +105,15 @@ export default function EventDetail() {
       <div className="px-4 sm:px-0">
         {/* Breadcrumb */}
         <nav className="flex mb-5 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="/">
-            <a className="hover:text-primary dark:hover:text-primary-400 transition-colors duration-200">
-              <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Events
-            </a>
-          </Link>
+          <span 
+            onClick={() => navigate("/")}
+            className="hover:text-primary dark:hover:text-primary-400 transition-colors duration-200 cursor-pointer"
+          >
+            <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Events
+          </span>
         </nav>
 
         {/* Event Detail Card */}

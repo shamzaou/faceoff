@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Button } from "@/components/ui/button";
 import MobileSidebar from "./mobile-sidebar";
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -17,7 +17,7 @@ export default function Header() {
   };
 
   const navLinkClasses = (path: string) => {
-    return `px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+    return `cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
       isActive(path)
         ? "text-primary dark:text-primary-400"
         : "text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
@@ -44,23 +44,38 @@ export default function Header() {
                   </svg>
                 )}
               </button>
-              <Link href="/">
-                <a className="text-xl font-bold text-primary dark:text-primary-400 tracking-tight">42 Events</a>
-              </Link>
+              <span 
+                onClick={() => navigate("/")}
+                className="text-xl font-bold text-primary dark:text-primary-400 tracking-tight cursor-pointer"
+              >
+                42 Events
+              </span>
             </div>
             <nav className="hidden lg:ml-6 lg:flex lg:space-x-6">
-              <Link href="/">
-                <a className={navLinkClasses("/")}>Home</a>
-              </Link>
-              <Link href="/upcoming-events">
-                <a className={navLinkClasses("/upcoming-events")}>Upcoming Events</a>
-              </Link>
-              <Link href="/past-events">
-                <a className={navLinkClasses("/past-events")}>Past Events</a>
-              </Link>
-              <Link href="/admin">
-                <a className={navLinkClasses("/admin")}>Admin</a>
-              </Link>
+              <span 
+                onClick={() => navigate("/")}
+                className={navLinkClasses("/")}
+              >
+                Home
+              </span>
+              <span 
+                onClick={() => navigate("/upcoming-events")}
+                className={navLinkClasses("/upcoming-events")}
+              >
+                Upcoming Events
+              </span>
+              <span 
+                onClick={() => navigate("/past-events")}
+                className={navLinkClasses("/past-events")}
+              >
+                Past Events
+              </span>
+              <span 
+                onClick={() => navigate("/admin")}
+                className={navLinkClasses("/admin")}
+              >
+                Admin
+              </span>
             </nav>
           </div>
           <div className="flex items-center">
