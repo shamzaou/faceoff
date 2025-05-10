@@ -7,6 +7,7 @@ import UpcomingEvents from "@/pages/upcoming-events";
 import PastEvents from "@/pages/past-events";
 import EventDetail from "@/pages/event-detail";
 import AdminDashboard from "@/pages/admin/dashboard";
+import Login from "@/pages/login";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 
@@ -17,6 +18,7 @@ function Router() {
       <main className="flex-grow">
         <Switch>
           <Route path="/" component={Home} />
+          <Route path="/login" component={Login} />
           <Route path="/upcoming-events" component={UpcomingEvents} />
           <Route path="/past-events" component={PastEvents} />
           <Route path="/events/:id" component={EventDetail} />

@@ -73,7 +73,8 @@ export class MemStorage implements IStorage {
       displayName: insertUser.displayName || null,
       password: insertUser.password || null,
       email: insertUser.email || null,
-      fortytwoId: insertUser.fortytwoId || null
+      fortytwoId: insertUser.fortytwoId || null,
+      role: insertUser.role || "user"
     };
     this.users.set(id, user);
     return user;
