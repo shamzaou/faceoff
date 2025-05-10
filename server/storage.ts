@@ -284,7 +284,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUpcomingEvents(): Promise<Event[]> {
     return await db.select().from(events).where(
-      eq(events.status, "upcoming").or(eq(events.status, "ongoing"))
+      sql`${events.status} = 'upcoming' OR ${events.status} = 'ongoing'`
     );
   }
 
@@ -330,11 +330,21 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User is already registered for this event");
     }
     
+    // Get current attendees count
+    const [currentEvent] = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId));
+    
+    if (!currentEvent) {
+      throw new Error("Event not found");
+    }
+    
     // Update event attendee count
     await db
       .update(events)
       .set({ 
-        attendees: db.select({ value: sql`${events.attendees} + 1` }).from(events).where(eq(events.id, eventId)).as("value")
+        attendees: (currentEvent.attendees || 0) + 1
       })
       .where(eq(events.id, eventId));
     

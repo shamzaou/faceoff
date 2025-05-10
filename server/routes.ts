@@ -80,7 +80,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const events = await storage.getUpcomingEvents();
       res.json(events);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching upcoming events" });
+      console.error("Upcoming events error:", error);
+      res.status(500).json({ message: "Error fetching upcoming events", error: String(error) });
     }
   });
 
