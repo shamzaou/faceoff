@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Event } from "@shared/schema";
 import { formatDate } from "@/lib/utils/date-formatter";
-import { useEventContext } from "@/provider/event-provider";
 import { useLocation } from "wouter";
 
 interface EventCardProps {
@@ -10,11 +9,9 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event }: EventCardProps) {
-  const { setSelectedEvent } = useEventContext();
   const [, setLocation] = useLocation();
 
   const handleClick = () => {
-    setSelectedEvent(event);
     setLocation(`/events/${event.id}`);
   };
 

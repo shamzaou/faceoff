@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useEvents } from "@/hooks/use-events";
-import EventSearch from "@/components/events/event-search";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils/date-formatter";
+import { Input } from "@/components/ui/input";
 import CreateEventModal from "@/components/admin/create-event-modal";
 import DeleteEventModal from "@/components/admin/delete-event-modal";
 import EditEventModal from "@/components/admin/edit-event-modal";
 import { Event } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AdminDashboard() {
   const { events, isLoading } = useEvents();
@@ -17,7 +18,18 @@ export default function AdminDashboard() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const { toast } = useToast();
+
+  // Filter events based on search and status filter
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        event.organizer.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || event.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
 
   const handleExport = () => {
     // Create CSV data
@@ -84,7 +96,47 @@ export default function AdminDashboard() {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-grow">
-              <EventSearch />
+              <div className="relative flex-grow">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="sm:w-48">
+              <Select
+                value={filterStatus}
+                onValueChange={setFilterStatus}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Events" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Events</SelectItem>
+                  <SelectItem value="upcoming">Upcoming</SelectItem>
+                  <SelectItem value="ongoing">Ongoing</SelectItem>
+                  <SelectItem value="past">Past</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="sm:w-48">
               <Button variant="outline" className="w-full" onClick={handleExport}>
@@ -118,14 +170,14 @@ export default function AdminDashboard() {
                       Loading events...
                     </td>
                   </tr>
-                ) : events.length === 0 ? (
+                ) : filteredEvents.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
                       No events found. Create one to get started.
                     </td>
                   </tr>
                 ) : (
-                  events.map(event => (
+                  filteredEvents.map(event => (
                     <tr key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
