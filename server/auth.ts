@@ -5,12 +5,29 @@ import { Strategy as OAuth2Strategy } from "passport-oauth2";
 import axios from "axios";
 import { storage } from "./storage";
 import { type User } from "@shared/schema";
+import crypto from "crypto";
 
 // 42 OAuth Configuration
 const FORTYTWO_CLIENT_ID = "u-s4t2ud-6c4a343fd92c2fcbb8f1ed67fa6518b5f1cff90d322bce634b2979384f799d70";
 const FORTYTWO_CLIENT_SECRET = "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";
 const FORTYTWO_CALLBACK_URL = "http://localhost:5000/api/auth/42/callback";
 const FORTYTWO_API_URL = "https://api.intra.42.fr";
+
+// Password hashing utilities
+export function hashPassword(password: string): string {
+  // In a real application, use a proper password hashing library like bcrypt
+  // This is a simple implementation for demonstration purposes
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(storedPassword: string, providedPassword: string): boolean {
+  // Password is stored as salt:hash
+  const [salt, storedHash] = storedPassword.split(':');
+  const hash = crypto.pbkdf2Sync(providedPassword, salt, 1000, 64, 'sha512').toString('hex');
+  return storedHash === hash;
+}
 
 export function setupAuth(app: Express): void {
   // Configure Passport
@@ -36,8 +53,14 @@ export function setupAuth(app: Express): void {
           return done(null, false, { message: "Invalid username or password" });
         }
 
-        // In a real application, you would verify the password with a proper hash comparison
-        if (user.password !== password) {
+        // Check if this is an OAuth user without a password
+        if (!user.password) {
+          return done(null, false, { message: "Invalid username or password" });
+        }
+
+        // Verify the password hash
+        const isValidPassword = verifyPassword(user.password, password);
+        if (!isValidPassword) {
           return done(null, false, { message: "Invalid username or password" });
         }
 
@@ -92,6 +115,50 @@ export function setupAuth(app: Express): void {
       }
     })
   );
+
+  // Add a test login endpoint that creates a test user if necessary
+  app.get("/api/auth/test-login", async (req, res, next) => {
+    try {
+      console.log("Test login endpoint hit");
+      
+      // Check if test user exists
+      let testUser = await storage.getUserByUsername("testuser");
+      
+      if (!testUser) {
+        console.log("Creating test user");
+        // Create a test user
+        testUser = await storage.createUser({
+          username: "testuser",
+          displayName: "Test User",
+          email: "test@example.com",
+          password: hashPassword("password123"),
+          role: "user"
+        });
+        console.log("Test user created:", testUser);
+      } else {
+        console.log("Test user already exists:", testUser);
+      }
+      
+      // Login the user
+      req.login(testUser, (loginErr) => {
+        if (loginErr) {
+          console.error("Test login error:", loginErr);
+          return next(loginErr);
+        }
+        console.log("Test user logged in successfully");
+        return res.json({ 
+          message: "Test user logged in automatically", 
+          user: testUser 
+        });
+      });
+    } catch (error) {
+      console.error("Test login error:", error);
+      res.status(500).json({ 
+        message: "Error creating/logging in test user", 
+        error: String(error) 
+      });
+    }
+  });
 
   // Simple login endpoint for local strategy
   app.post("/api/auth/login", (req, res, next) => {

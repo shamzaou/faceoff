@@ -31,21 +31,21 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
+  --background: 0 0% 0%;  /* Pure black background */
   --foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
+  --muted: 0 0% 15%;      /* Darker muted background */
   --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 3.9%;
+  --popover: 0 0% 0%;     /* Black popover */
   --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  --card: 0 0% 0%;        /* Black card */
   --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
+  --border: 0 0% 20%;     /* Darker border */
+  --input: 0 0% 15%;      /* Darker input */
   --primary: 246 79% 60%;
   --primary-foreground: 211 100% 99%;
-  --secondary: 240 3.7% 15.9%;
+  --secondary: 0 0% 15%;  /* Darker secondary */
   --secondary-foreground: 0 0% 98%;
-  --accent: 240 3.7% 15.9%;
+  --accent: 0 0% 15%;     /* Darker accent */
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
@@ -64,7 +64,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200;
+    @apply font-sans antialiased bg-black text-gray-100 min-h-screen flex flex-col transition-colors duration-200;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -83,5 +83,26 @@
   
   .animate-pulse-slow {
     animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* Spline Loader */
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #FFF;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

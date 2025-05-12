@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Button } from "@/components/ui/button";
 import MobileSidebar from "./mobile-sidebar";
+import { useAuth } from "@/provider/auth-provider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -19,20 +27,20 @@ export default function Header() {
   const navLinkClasses = (path: string) => {
     return `cursor-pointer px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
       isActive(path)
-        ? "text-primary dark:text-primary-400"
-        : "text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+        ? "text-primary-400"
+        : "text-gray-300 hover:text-white"
     }`;
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm z-10 relative border-b border-gray-200 dark:border-gray-700">
+    <header className="bg-black shadow-sm z-10 relative border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <button
                 onClick={toggleSidebar}
-                className="mr-2 p-2 rounded-md lg:hidden text-gray-500 hover:text-gray-900 dark:hover:text-white focus:outline-none"
+                className="mr-2 p-2 rounded-md lg:hidden text-gray-400 hover:text-white focus:outline-none"
               >
                 {sidebarOpen ? (
                   <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -46,7 +54,7 @@ export default function Header() {
               </button>
               <span 
                 onClick={() => navigate("/")}
-                className="text-xl font-bold text-primary dark:text-primary-400 tracking-tight cursor-pointer"
+                className="text-xl font-bold text-primary-400 tracking-tight cursor-pointer"
               >
                 42 Events
               </span>
@@ -70,26 +78,71 @@ export default function Header() {
               >
                 Past Events
               </span>
-              <span 
-                onClick={() => navigate("/admin")}
-                className={navLinkClasses("/admin")}
-              >
-                Admin
-              </span>
+              {isAdmin && (
+                <span 
+                  onClick={() => navigate("/admin")}
+                  className={navLinkClasses("/admin")}
+                >
+                  Admin
+                </span>
+              )}
             </nav>
           </div>
           <div className="flex items-center">
             <div className="flex items-center gap-4">
-              <ModeToggle />
-              
-              <Button 
-                variant="ghost" 
-                className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none transition-colors duration-200"
-                onClick={() => navigate("/login")}
-              >
-                <span className="mr-2">Login with</span>
-                <span className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">42</span>
-              </Button>
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none transition-colors duration-200">
+                      <span className="mr-2">{user?.displayName || user?.username}</span>
+                      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                        {user?.username?.charAt(0).toUpperCase() || '?'}
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => navigate("/profile")}
+                    >
+                      Profile
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => navigate("/admin")}
+                        >
+                          Admin Dashboard
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => navigate("/admin/users")}
+                        >
+                          Manage Users
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer text-red-500 focus:text-red-500"
+                      onClick={logout}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none transition-colors duration-200"
+                  onClick={() => navigate("/login")}
+                >
+                  <span className="mr-2">Login with</span>
+                  <span className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">42</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>

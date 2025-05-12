@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/provider/auth-provider";
+import { useLocation } from "wouter";
 
 const formSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -18,8 +17,9 @@ const formSchema = z.object({
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
-  const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
+  const [, navigate] = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,32 +32,10 @@ export default function Login() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      toast({
-        title: "Login successful",
-        description: `Welcome back, ${data.user.username}!`,
-      });
-
-      navigate("/");
+      await login(values.username, values.password);
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
-      });
+      // Error is already handled in the login function
+      console.error("Login submission error:", error);
     } finally {
       setLoading(false);
     }
